@@ -1,13 +1,19 @@
 public class Main {
     public static void main(String[] args) {
-        // Prueba rápida de la pila
-        String[] ingredientes = {"Queso", "Tomate", "Jamón"};
-        Pizza pizza = new Pizza("Hawaiana", ingredientes);
+        // Prueba rápida de GestionPedidos
+        GestionPedidos gestion = new GestionPedidos();
 
-        Pila pila = new Pila();
-        pila.push(pizza);
+        String[] ingredientes1 = {"Queso", "Tomate", "Jamón"};
+        Pizza pizza1 = new Pizza("Hawaiana", ingredientes1);
 
-        System.out.println("Pizza en el tope: " + pila.peek());
+        gestion.registrarPizza(pizza1);
+        System.out.println("Pedido actual: " + gestion.mostrarPedidoActual());
+
+        gestion.deshacer();
+        System.out.println("Después de deshacer: " + gestion.mostrarPedidoActual());
+
+        gestion.rehacer();
+        System.out.println("Después de rehacer: " + gestion.mostrarPedidoActual());
     }
 }
 
@@ -18,14 +24,6 @@ class Pizza {
     public Pizza(String nombre, String[] ingredientes) {
         this.nombre = nombre;
         this.ingredientes = ingredientes;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public String[] getIngredientes() {
-        return ingredientes;
     }
 
     @Override
@@ -48,10 +46,6 @@ class Nodo {
 class Pila {
     private Nodo tope;
 
-    public Pila() {
-        this.tope = null;
-    }
-
     public void push(Pizza pizza) {
         Nodo nuevo = new Nodo(pizza);
         nuevo.siguiente = tope;
@@ -59,22 +53,42 @@ class Pila {
     }
 
     public Pizza pop() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         Pizza pizza = tope.dato;
         tope = tope.siguiente;
         return pizza;
     }
 
     public Pizza peek() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         return tope.dato;
     }
 
     public boolean isEmpty() {
         return tope == null;
+    }
+}
+
+class GestionPedidos {
+    private Pila pilaPedidos = new Pila();
+    private Pila pilaUndo = new Pila();
+
+    public void registrarPizza(Pizza pizza) {
+        pilaPedidos.push(pizza);
+        pilaUndo = new Pila(); // limpiar pila de undo
+    }
+
+    public void deshacer() {
+        Pizza ultima = pilaPedidos.pop();
+        if (ultima != null) pilaUndo.push(ultima);
+    }
+
+    public void rehacer() {
+        Pizza ultima = pilaUndo.pop();
+        if (ultima != null) pilaPedidos.push(ultima);
+    }
+
+    public Pizza mostrarPedidoActual() {
+        return pilaPedidos.peek();
     }
 }
